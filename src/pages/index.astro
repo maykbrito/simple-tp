@@ -1,0 +1,120 @@
+---
+import '@/styles/globals.css'
+import { Button } from '@/components/ui/button';
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple TP</title>
+    <style>    
+      #tp {
+        font-size: 5rem;
+        transform: scaleX(1);
+      }
+
+      #tp.reversed {
+        transform: scaleX(-1);
+      }
+    </style>
+    
+  </head>
+  <body>
+    <div class="fixed w-full z-10 p-2">
+      <div class=" rounded-lg border bg-card text-card-foreground shadow-sm w-full p-2 flex justify-between items-center bg-white">
+        <div class="flex gap-2 items-center">
+          <Button data-slow-down>-</Button> <Button data-speed-up>+</Button>
+        </div>
+        <div>
+          <Button data-toggle-play>Play/Stop</Button>
+        </div>
+      </div>
+    </div>
+    <div class="pt-20"></div>
+    <div id="tp" class="relative z-0 p-2" contenteditable>paste here <br> HIT CTRL + Y para interver</div>
+
+    
+  </body>
+
+  <script>
+    const updateScrollTime = (velocity: number) => {
+      scrollTime = velocity
+    }
+
+    let scrolling: number | undefined,
+      scrollTime: number = 15
+    
+    function startScroll() {
+      window.scrollBy(0, 1)
+      scrolling = setTimeout(startScroll, scrollTime)
+    }
+
+    function stopScroll() {
+      clearTimeout(scrolling)
+      scrolling = undefined
+    }
+    
+
+    interface KeysProps {
+      [key: string]: boolean;
+    }
+
+    let keys: KeysProps = {}
+    window.addEventListener('keyup', e => {
+      keys = {}
+    })
+
+    window.addEventListener('keydown', e => {
+      
+      keys[e.key] = true
+
+      if(keys['Control'] && keys['y']) {
+        document.getElementById('tp')?.classList.toggle('reversed')
+      }
+      
+      else if (keys['Control'] && keys['l']) {
+        togglePlay()
+      }
+
+      else if (keys['Control'] && keys['j']) {
+        decreaseSpeed()
+      }
+
+      else if (keys['Control'] && keys['k']) {
+        increaseSpeed(e)
+      }
+    })
+
+    function togglePlay () {
+      if (scrolling) {
+          stopScroll()
+      } else {
+        startScroll()
+      }
+    }
+
+    const increaseSpeed = (e) => {
+      updateScrollTime( scrollTime - 1 )
+      if(scrollTime < 0 ) {
+        scrollTime = 0
+        e.currentTarget.disabled = true
+      }
+    }
+
+    const decreaseSpeed = () => {
+      updateScrollTime( scrollTime + 1 )
+    }
+
+    const clicks = {
+      'data-speed-up': increaseSpeed,
+      'data-slow-down': decreaseSpeed,
+      'data-toggle-play': togglePlay
+    }
+
+    Object.keys(clicks).forEach(data => {
+      document.querySelector(`[${data}]`)?.addEventListener('click', clicks[data])
+    })
+  </script>
+</html>
