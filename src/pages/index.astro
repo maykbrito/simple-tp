@@ -31,24 +31,23 @@ import { Button } from "@/components/ui/button";
           <Button data-speed-up>+</Button>
         </div>
         <div>
-          <Button id="action" data-toggle-play>Play/Stop</Button>
-        </div> 
+          <Button id="action" data-toggle-play>Play</Button>
+        </div>
       </div>
     </div>
     <div class="pt-20"></div>
-    <div
-      id="tp"
-      class="relative z-0 p-2 border mx-2 rounded-lg my-2"
-      contenteditable
-    >
+    <div class="flex items-end justify-end mr-4 mb-1">
+      <Button class="my-10" htmlType="button" id="format">Formartar</Button>
+    </div>
+    <div id="tp" class="relative z-0 p-2 border min-h-max" contenteditable>
       paste here <br /> HIT CTRL + Y para interver
     </div>
   </body>
 
   <script>
-   const updateScrollTime = (velocity: number) => {
-      scrollTime = velocity
-    }
+    const updateScrollTime = (velocity: number) => {
+      scrollTime = velocity;
+    };
 
     let scrolling: number | undefined,
       scrollTime: number = 15;
@@ -83,6 +82,8 @@ import { Button } from "@/components/ui/button";
         decreaseSpeed();
       } else if (keys["Control"] && keys["k"]) {
         increaseSpeed(e);
+      } else if (keys["Control"] && keys["i"]) {
+        formatText();
       }
     });
 
@@ -120,25 +121,51 @@ import { Button } from "@/components/ui/button";
         ?.addEventListener("click", clicks[data]);
     });
 
-    // remove format from text pasted
-    let editableDiv = document.querySelector("#tp");
+    function isTextSelectedInDiv(divElement) {
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return false;
 
-    editableDiv.addEventListener("paste", (e) => {
-      e.preventDefault();
+      const range = selection.getRangeAt(0);
+      if (range.collapsed) return false;
 
-      const text = (e as ClipboardEvent).clipboardData.getData("text/plain");
+      const selectedNode = selection.anchorNode;
+      return divElement.contains(selectedNode);
+    }
+
+    function checkSelectionAndUpdateButton() {
+      const editableDiv = document.querySelector("#tp");
+      const formatButton = document.getElementById(
+        "format",
+      ) as HTMLButtonElement;
+      formatButton.disabled = !isTextSelectedInDiv(editableDiv);
+    }
+
+    document.addEventListener("selectionchange", checkSelectionAndUpdateButton);
+
+    function formatText() {
+      const editableDiv = document.querySelector("#tp");
       const selection = window.getSelection();
 
-      if (!selection.rangeCount) return false;
-      selection.deleteFromDocument();
-      selection.getRangeAt(0).insertNode(document.createTextNode(text));
+      if (
+        selection.rangeCount > 0 &&
+        editableDiv.contains(selection.anchorNode)
+      ) {
+        const range = selection.getRangeAt(0);
+        const selectedText = range.toString();
 
-      selection.collapseToEnd();
-    });
+        if (selectedText.trim().length > 0) {
+          const textNode = document.createTextNode(selectedText);
 
-    // atualize o botao quando se esta no play ou parado
-    const actionButton = document.querySelector("#action");
+          range.deleteContents();
+          range.insertNode(textNode);
 
-    
+          selection.removeAllRanges();
+          const newRange = document.createRange();
+          newRange.selectNodeContents(textNode);
+          selection.addRange(newRange);
+        }
+      }
+    }
+    document.getElementById("format").addEventListener("click", formatText);
   </script>
 </html>
