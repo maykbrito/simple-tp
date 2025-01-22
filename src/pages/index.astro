@@ -25,7 +25,9 @@ import { Button } from '@/components/ui/button';
     <div class="fixed w-full z-10 p-2">
       <div class=" rounded-lg border bg-card text-card-foreground shadow-sm w-full p-2 flex justify-between items-center bg-white">
         <div class="flex gap-2 items-center">
-          <Button data-slow-down>-</Button> <Button data-speed-up>+</Button>
+          <Button data-slow-down>-</Button> 
+          <Button data-speed-up>+</Button>
+          <Button data-reverse>Rev</Button>
         </div>
         <div>
           <Button data-toggle-play>Play/Stop</Button>
@@ -43,12 +45,13 @@ import { Button } from '@/components/ui/button';
       scrollTime = velocity
     }
 
-    let scrolling: number | undefined,
-      scrollTime: number = 15
+    let scrolling: number | undefined
+    let scrollTime: number = 15
+    let direction: number = 1 // 1 for forward, -1 for reverse
     
     function startScroll() {
-      window.scrollBy(0, 1)
-      scrolling = setTimeout(startScroll, scrollTime)
+      window.scrollBy(0, 1 * direction)
+    scrolling = setTimeout(startScroll, scrollTime)
     }
 
     function stopScroll() {
@@ -85,6 +88,10 @@ import { Button } from '@/components/ui/button';
       else if (keys['Control'] && keys['k']) {
         increaseSpeed(e)
       }
+
+      else if (keys['Control'] && keys[';']) {
+        toggleDirection()
+    }
     })
 
     function togglePlay () {
@@ -107,10 +114,15 @@ import { Button } from '@/components/ui/button';
       updateScrollTime( scrollTime + 1 )
     }
 
+    const toggleDirection = () => {
+      direction *= -1
+    }
+
     const clicks = {
       'data-speed-up': increaseSpeed,
       'data-slow-down': decreaseSpeed,
-      'data-toggle-play': togglePlay
+      'data-toggle-play': togglePlay,
+      'data-reverse': toggleDirection
     }
 
     Object.keys(clicks).forEach(data => {
