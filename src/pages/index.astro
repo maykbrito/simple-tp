@@ -1,15 +1,16 @@
 ---
-import '@/styles/globals.css'
-import { Button } from '@/components/ui/button';
+import "@/styles/globals.css";
+import { Button } from "@/components/ui/button";
 ---
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Simple TP</title>
-    <style>    
+    <style>
       #tp {
         font-size: 5rem;
         transform: scaleX(1);
@@ -19,114 +20,116 @@ import { Button } from '@/components/ui/button';
         transform: scaleX(-1);
       }
     </style>
-    
   </head>
   <body>
-    <div class="fixed w-full z-10 p-2">
-      <div class=" rounded-lg border bg-card text-card-foreground shadow-sm w-full p-2 flex justify-between items-center bg-white">
+    <div class="fixed w-full z-10 p-2 group">
+      <div
+        class="rounded-lg border bg-card text-card-foreground shadow-sm w-full p-2 flex justify-between items-center bg-white dark:bg-black dark:text-white opacity-0 group-hover:opacity-90"
+      >
         <div class="flex gap-2 items-center">
-          <Button data-slow-down>-</Button> 
+          <Button data-slow-down>-</Button>
           <Button data-speed-up>+</Button>
           <Button data-reverse>Rev</Button>
+          <Button data-toggle-theme>Toggle Dark/Light</Button>
         </div>
         <div>
           <Button data-toggle-play>Play/Stop</Button>
         </div>
       </div>
     </div>
-    <div class="pt-20"></div>
-    <div id="tp" class="relative z-0 p-2" contenteditable>paste here <br> HIT CTRL + Y para interver</div>
-
-    
+    <div
+      id="tp"
+      class="relative z-0 p-2 dark:bg-black dark:text-white"
+      contenteditable
+    >
+      paste here <br /> HIT CTRL + Y para interver
+    </div>
   </body>
 
   <script>
     const updateScrollTime = (velocity: number) => {
-      scrollTime = velocity
-    }
+      scrollTime = velocity;
+    };
 
-    let scrolling: number | undefined
-    let scrollTime: number = 15
-    let direction: number = 1 // 1 for forward, -1 for reverse
-    
+    let scrolling: number | undefined;
+    let scrollTime: number = 15;
+    let direction: number = 1; // 1 for forward, -1 for reverse
+
     function startScroll() {
-      window.scrollBy(0, 1 * direction)
-    scrolling = setTimeout(startScroll, scrollTime)
+      window.scrollBy(0, 1 * direction);
+      scrolling = setTimeout(startScroll, scrollTime);
     }
 
     function stopScroll() {
-      clearTimeout(scrolling)
-      scrolling = undefined
+      clearTimeout(scrolling);
+      scrolling = undefined;
     }
-    
 
     interface KeysProps {
       [key: string]: boolean;
     }
 
-    let keys: KeysProps = {}
-    window.addEventListener('keyup', e => {
-      keys = {}
-    })
+    let keys: KeysProps = {};
+    window.addEventListener("keyup", () => {
+      keys = {};
+    });
 
-    window.addEventListener('keydown', e => {
-      
-      keys[e.key] = true
+    window.addEventListener("keydown", (e) => {
+      keys[e.key] = true;
 
-      if(keys['Control'] && keys['y']) {
-        document.getElementById('tp')?.classList.toggle('reversed')
+      if (keys["Control"] && keys["y"]) {
+        document.getElementById("tp")?.classList.toggle("reversed");
+      } else if (keys["Control"] && keys["l"]) {
+        togglePlay();
+      } else if (keys["Control"] && keys["j"]) {
+        decreaseSpeed();
+      } else if (keys["Control"] && keys["k"]) {
+        increaseSpeed();
+      } else if (keys["Control"] && keys[";"]) {
+        toggleDirection();
       }
-      
-      else if (keys['Control'] && keys['l']) {
-        togglePlay()
-      }
+    });
 
-      else if (keys['Control'] && keys['j']) {
-        decreaseSpeed()
-      }
-
-      else if (keys['Control'] && keys['k']) {
-        increaseSpeed(e)
-      }
-
-      else if (keys['Control'] && keys[';']) {
-        toggleDirection()
-    }
-    })
-
-    function togglePlay () {
+    function togglePlay() {
       if (scrolling) {
-          stopScroll()
+        stopScroll();
       } else {
-        startScroll()
+        startScroll();
       }
     }
 
-    const increaseSpeed = (e) => {
-      updateScrollTime( scrollTime - 1 )
-      if(scrollTime < 0 ) {
-        scrollTime = 0
-        e.currentTarget.disabled = true
+    const increaseSpeed = () => {
+      updateScrollTime(scrollTime - 1);
+      if (scrollTime < 0) {
+        scrollTime = 0;
       }
-    }
+    };
 
     const decreaseSpeed = () => {
-      updateScrollTime( scrollTime + 1 )
-    }
+      updateScrollTime(scrollTime + 1);
+    };
 
     const toggleDirection = () => {
-      direction *= -1
-    }
+      direction *= -1;
+    };
+
+    const toggleTheme = () => {
+      document.body.classList.toggle("dark");
+    };
 
     const clicks = {
-      'data-speed-up': increaseSpeed,
-      'data-slow-down': decreaseSpeed,
-      'data-toggle-play': togglePlay,
-      'data-reverse': toggleDirection
-    }
+      "data-speed-up": increaseSpeed,
+      "data-slow-down": decreaseSpeed,
+      "data-toggle-play": togglePlay,
+      "data-reverse": toggleDirection,
+      "data-toggle-theme": toggleTheme,
+    };
 
-    Object.keys(clicks).forEach(data => {
-      document.querySelector(`[${data}]`)?.addEventListener('click', clicks[data])
-    })
+    Object.keys(clicks).forEach((data) => {
+      const currentFunction = clicks[data as keyof typeof clicks] as () => void;
+      document
+        .querySelector(`[${data}]`)
+        ?.addEventListener("click", currentFunction);
+    });
   </script>
 </html>
