@@ -30,7 +30,8 @@ import { Button } from "@/components/ui/button";
           <Button data-slow-down>-</Button>
           <Button data-speed-up>+</Button>
           <Button data-reverse>Rev</Button>
-          <Button data-toggle-theme>Toggle Dark/Light</Button>
+          <Button data-invert>Inv</Button>
+          <Button data-toggle-theme>Dark/Light</Button>
         </div>
         <div>
           <Button data-toggle-play>Play/Stop</Button>
@@ -78,7 +79,7 @@ import { Button } from "@/components/ui/button";
       keys[e.key] = true;
 
       if (keys["Control"] && keys["y"]) {
-        document.getElementById("tp")?.classList.toggle("reversed");
+        invertText();
       } else if (keys["Control"] && keys["l"]) {
         togglePlay();
       } else if (keys["Control"] && keys["j"]) {
@@ -113,6 +114,10 @@ import { Button } from "@/components/ui/button";
       direction *= -1;
     };
 
+    const invertText = () => {
+      document.getElementById("tp")?.classList.toggle("reversed");
+    };
+
     const toggleTheme = () => {
       document.body.classList.toggle("dark");
     };
@@ -122,6 +127,7 @@ import { Button } from "@/components/ui/button";
       "data-slow-down": decreaseSpeed,
       "data-toggle-play": togglePlay,
       "data-reverse": toggleDirection,
+      "data-invert": invertText,
       "data-toggle-theme": toggleTheme,
     };
 
