@@ -27,14 +27,15 @@ import { Button } from "@/components/ui/button";
         class="rounded-lg border bg-card text-card-foreground shadow-sm w-full p-2 flex justify-between items-center bg-white dark:bg-black dark:text-white opacity-0 group-hover:opacity-90"
       >
         <div class="flex gap-2 items-center">
-          <Button data-slow-down>-</Button>
-          <Button data-speed-up>+</Button>
-          <Button data-reverse>Rev</Button>
-          <Button data-invert>Inv</Button>
-          <Button data-toggle-theme>Dark/Light</Button>
+          <Button data-slow-down><i data-lucide="minus"></i></Button>
+          <Button data-speed-up><i data-lucide="plus"></i></Button>
+          <Button data-reverse><i data-lucide="arrow-down-up"></i></Button>
+          <Button data-invert><i data-lucide="flip-horizontal-2"></i></Button>
+          <Button data-lock-toggle><i data-lucide="lock-open"></i></Button>
+          <Button data-toggle-theme><i data-lucide="sun-moon"></i></Button>
         </div>
         <div>
-          <Button data-toggle-play>Play/Stop</Button>
+          <Button data-toggle-play><i data-lucide="play"></i></Button>
         </div>
       </div>
     </div>
@@ -47,14 +48,15 @@ import { Button } from "@/components/ui/button";
     </div>
   </body>
 
-  <script>
-    const updateScrollTime = (velocity: number) => {
+  <script is:inline src="https://unpkg.com/lucide@latest"></script>
+  <script is:inline>
+    const updateScrollTime = (velocity) => {
       scrollTime = velocity;
     };
 
-    let scrolling: number | undefined;
-    let scrollTime: number = 15;
-    let direction: number = 1; // 1 for forward, -1 for reverse
+    let scrolling;
+    let scrollTime = 15;
+    let direction = 1; // 1 for forward, -1 for reverse
 
     function startScroll() {
       window.scrollBy(0, 1 * direction);
@@ -66,11 +68,7 @@ import { Button } from "@/components/ui/button";
       scrolling = undefined;
     }
 
-    interface KeysProps {
-      [key: string]: boolean;
-    }
-
-    let keys: KeysProps = {};
+    let keys = {};
     window.addEventListener("keyup", () => {
       keys = {};
     });
@@ -91,11 +89,25 @@ import { Button } from "@/components/ui/button";
       }
     });
 
+    const setActive = (selector, active) => {
+      const btn = document.querySelector(`[${selector}]`);
+      if (!btn) return;
+      if (active) {
+        btn.style.backgroundColor = "#a3e635";
+        btn.style.color = "#000";
+      } else {
+        btn.style.backgroundColor = "";
+        btn.style.color = "";
+      }
+    };
+
     function togglePlay() {
       if (scrolling) {
         stopScroll();
+        setActive("data-toggle-play", false);
       } else {
         startScroll();
+        setActive("data-toggle-play", true);
       }
     }
 
@@ -112,14 +124,31 @@ import { Button } from "@/components/ui/button";
 
     const toggleDirection = () => {
       direction *= -1;
+      setActive("data-reverse", direction === -1);
     };
 
     const invertText = () => {
       document.getElementById("tp")?.classList.toggle("reversed");
+      const isReversed = document.getElementById("tp")?.classList.contains("reversed");
+      setActive("data-invert", isReversed);
     };
 
     const toggleTheme = () => {
       document.body.classList.toggle("dark");
+      setActive("data-toggle-theme", document.body.classList.contains("dark"));
+    };
+
+    const toggleLock = () => {
+      const tp = document.getElementById("tp");
+      if (!tp) return;
+      const locked = tp.getAttribute("contenteditable") === "false";
+      tp.setAttribute("contenteditable", locked ? "true" : "false");
+      setActive("data-lock-toggle", !locked);
+      const btn = document.querySelector("[data-lock-toggle] i");
+      if (btn) {
+        btn.setAttribute("data-lucide", locked ? "lock-open" : "lock");
+        lucide.createIcons();
+      }
     };
 
     const clicks = {
@@ -128,14 +157,17 @@ import { Button } from "@/components/ui/button";
       "data-toggle-play": togglePlay,
       "data-reverse": toggleDirection,
       "data-invert": invertText,
+      "data-lock-toggle": toggleLock,
       "data-toggle-theme": toggleTheme,
     };
 
     Object.keys(clicks).forEach((data) => {
-      const currentFunction = clicks[data as keyof typeof clicks] as () => void;
+      const currentFunction = clicks[data];
       document
         .querySelector(`[${data}]`)
         ?.addEventListener("click", currentFunction);
     });
+
+    lucide.createIcons();
   </script>
 </html>
